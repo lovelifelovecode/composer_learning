@@ -1,0 +1,98 @@
+依赖管理
+Composer 不是一个包管理器。是的，它涉及 "packages" 和 "libraries"，但它在每个项目的基础上进行管理，在你项目的某个目录中（例如 vendor）进行安装。默认情况下它不会在全局安装任何东西。因此，这仅仅是一个依赖管理。
+
+
+安装 Composer，你只需要下载 composer.phar 可执行文件。
+curl -sS https://getcomposer.org/installer | php
+
+
+要检查 Composer 是否正常工作，只需要通过 php 来执行 PHAR：
+php composer.phar
+	
+
+全局安装
+mv composer.phar /usr/local/bin/composer
+
+
+关于 require Key
+第一件事情（并且往往只需要做这一件事），你需要在 composer.json 文件中指定 require key 的值。你只需要简单的告诉 Composer 你的项目需要依赖哪些包。
+{
+    "require": {
+        "monolog/monolog": "1.0.*"
+    }
+}
+
+
+包名称
+包名称由供应商名称和其项目名称构成。通常容易产生相同的项目名称，而供应商名称的存在则很好的解决了命名冲突的问题。它允许两个不同的人创建同样名为 json 的库，而之后它们将被命名为 igorw/json 和 seldaek/json。
+
+
+包版本
+在前面的例子中，我们引入的 monolog 版本指定为 1.0.*。这表示任何从 1.0 开始的开发分支，它将会匹配 1.0.0、1.0.2 或者 1.0.20。
+
+
+稳定性
+默认情况下只有稳定的发行版才会被考虑在内。
+alpha版：内部测试版。α是希腊字母的第一个，表示最早的版本，一般用户不要下载这个版本，这个版本包含很多BUG，功能也不全，主要是给开发人员和 测试人员测试和找BUG用的。
+
+beta版：公开测试版。β是希腊字母的第二个，顾名思义，这个版本比alpha版发布得晚一些，主要是给“部落”用户和忠实用户测试用的，该版本任然存 在很多BUG.
+
+rc版：Release Candidate（候选版本），该版本又较beta版更进一步了，该版本功能不再增加，和最终发布版功能一样。这个版本有点像最终发行版之前的一个类似 
+预览版，这个的发布就标明离最终发行版不远了。作为普通用户，如果你很急着用这个软件的话，也可以下载这个版本。
+
+stable版：稳定版。在开源软件中，都有stable版，这个就是开源软件的最终发行版，用户可以放心大胆的用了。
+
+
+要解决和下载依赖，请执行 install 命令：
+composer.phar install
+
+
+composer.lock - 锁文件
+在安装依赖后，Composer 将把安装时确切的版本号列表写入 composer.lock 文件。这将锁定改项目的特定版本。
+请提交你应用程序的 composer.lock （包括 composer.json）到你的版本库中
+
+这是非常重要的，因为 install 命令将会检查锁文件是否存在，如果存在，它将下载指定的版本（忽略 composer.json 文件中的定义）。
+
+这意味着，任何人建立项目都将下载与指定版本完全相同的依赖。你的持续集成服务器、生产环境、你团队中的其他开发人员、每件事、每个人都使用相同的依赖，从而减轻潜在的错误对部署的影响。即使你独自开发项目，在六个月内重新安装项目时，你也可以放心的继续工作，即使从那时起你的依赖已经发布了许多新的版本。
+
+
+这将获取最新匹配的版本（根据你的 composer.json 文件）并将新版本更新进锁文件。
+php composer.phar update
+
+
+自动加载
+除了库的下载，Composer 还准备了一个自动加载文件，它可以加载 Composer 下载的库中所有的类文件。使用它，你只需要将下面这行代码添加到你项目的引导文件中：
+require 'vendor/autoload.php';
+
+
+composer.json：项目安装
+要开始在你的项目中使用 Composer，你只需要一个 composer.json 文件。该文件包含了项目的依赖和其它的一些元数据。
+
+
+搜索 search
+search 命令允许你为当前项目搜索依赖包，通常它只搜索 packagist.org 上的包，你可以简单的输入你的搜索条件。
+php composer.phar search monolog
+
+
+初始化 init
+在 “库” 那一章我们看到了如何手动创建 composer.json 文件。实际上还有一个 init 命令可以更容易的做到这一点。
+
+当您运行该命令，它会以交互方式要求您填写一些信息，同时聪明的使用一些默认值。
+php composer.phar init
+
+初始化-参数
+--name: 包的名称。
+--description: 包的描述。
+--author: 包的作者。
+--homepage: 包的主页。
+--require: 需要依赖的其它包，必须要有一个版本约束。并且应该遵循 foo/bar:1.0.0 这样的格式。
+--require-dev: 开发版的依赖包，内容格式与 --require 相同。
+--stability (-s): minimum-stability 字段的值。
+
+
+展示 show
+列出所有可用的软件包，你可以使用 show 命令。
+php composer.phar show
+
+如果你想看到一个包的详细信息，你可以输入一个包名称。
+php composer.phar show monolog/monolog
